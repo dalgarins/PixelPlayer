@@ -346,54 +346,6 @@ class PlayerViewModel @Inject constructor(
 
     private val _loadedTabs = MutableStateFlow(emptySet<String>())
 
-    val availableSortOptions: StateFlow<List<SortOption>> =
-        lastLibraryTabIndexFlow.map { tabIndex ->
-            Trace.beginSection("PlayerViewModel.availableSortOptionsMapping")
-            val options = when (tabIndex) {
-                0 -> listOf(
-                    SortOption.SongTitleAZ,
-                    SortOption.SongTitleZA,
-                    SortOption.SongArtist,
-                    SortOption.SongAlbum,
-                    SortOption.SongDateAdded,
-                    SortOption.SongDuration
-                )
-                1 -> listOf(
-                    SortOption.AlbumTitleAZ,
-                    SortOption.AlbumTitleZA,
-                    SortOption.AlbumArtist,
-                    SortOption.AlbumReleaseYear
-                )
-                2 -> listOf(SortOption.ArtistNameAZ, SortOption.ArtistNameZA)
-                3 -> listOf(
-                    SortOption.PlaylistNameAZ,
-                    SortOption.PlaylistNameZA,
-                    SortOption.PlaylistDateCreated
-                )
-                4 -> listOf(
-                    SortOption.FolderNameAZ,
-                    SortOption.FolderNameZA
-                )
-                5 -> listOf(
-                    SortOption.LikedSongTitleAZ,
-                    SortOption.LikedSongTitleZA,
-                    SortOption.LikedSongArtist,
-                    SortOption.LikedSongAlbum,
-                    SortOption.LikedSongDateLiked
-                )
-                else -> emptyList()
-            }
-            Trace.endSection()
-            options
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = listOf( // Provide a default initial value based on initialTab index 0
-                SortOption.SongTitleAZ, SortOption.SongTitleZA, SortOption.SongArtist,
-                SortOption.SongAlbum, SortOption.SongDateAdded, SortOption.SongDuration
-            )
-        )
-
     val isSyncingStateFlow: StateFlow<Boolean> = syncManager.isSyncing
         .stateIn(
             scope = viewModelScope,

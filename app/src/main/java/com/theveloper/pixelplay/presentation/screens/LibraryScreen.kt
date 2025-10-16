@@ -378,25 +378,38 @@ fun LibraryScreen(
                     // shape = AbsoluteSmoothCornerShape(cornerRadiusTL = 24.dp, smoothnessAsPercentTR = 60, /*...*/) // Your custom shape
                 ) {
                     Column(Modifier.fillMaxSize()) {
-                        // OPTIMIZACIÓN: La lógica de ordenamiento ahora es más eficiente.
-                        val availableSortOptions by playerViewModel.availableSortOptions.collectAsState()
                         val playerUiState by playerViewModel.playerUiState.collectAsState()
                         val playlistUiState by playlistViewModel.uiState.collectAsState()
 
-                        // Recolectamos el estado de ordenación de forma más inteligente.
-                        val currentSelectedSortOption = remember(pagerState.currentPage, tabTitles, playerUiState, playlistUiState) {
-                             when (tabTitles.getOrNull(pagerState.currentPage)) {
-                                "SONGS" -> playerUiState.currentSongSortOption
-                                "ALBUMS" -> playerUiState.currentAlbumSortOption
-                                "ARTIST" -> playerUiState.currentArtistSortOption
-                                "PLAYLISTS" -> playlistUiState.currentPlaylistSortOption
-                                "LIKED" -> playerUiState.currentFavoriteSortOption
-                                "FOLDERS" -> playerUiState.currentFolderSortOption
-                                else -> SortOption.SongTitleAZ
+                        val availableSortOptions by remember {
+                            derivedStateOf {
+                                when (tabTitles.getOrNull(pagerState.currentPage)) {
+                                    "SONGS" -> listOf(SortOption.SongTitleAZ, SortOption.SongTitleZA, SortOption.SongArtist, SortOption.SongAlbum, SortOption.SongDateAdded, SortOption.SongDuration)
+                                    "ALBUMS" -> listOf(SortOption.AlbumTitleAZ, SortOption.AlbumTitleZA, SortOption.AlbumArtist, SortOption.AlbumReleaseYear)
+                                    "ARTIST" -> listOf(SortOption.ArtistNameAZ, SortOption.ArtistNameZA)
+                                    "PLAYLISTS" -> listOf(SortOption.PlaylistNameAZ, SortOption.PlaylistNameZA, SortOption.PlaylistDateCreated)
+                                    "LIKED" -> listOf(SortOption.LikedSongTitleAZ, SortOption.LikedSongTitleZA, SortOption.LikedSongArtist, SortOption.LikedSongAlbum, SortOption.LikedSongDateLiked)
+                                    "FOLDERS" -> listOf(SortOption.FolderNameAZ, SortOption.FolderNameZA)
+                                    else -> emptyList()
+                                }
                             }
                         }
 
-                        val onSortOptionChanged: (SortOption) -> Unit = remember(playerViewModel, playlistViewModel, pagerState.currentPage, tabTitles) {
+                        val currentSelectedSortOption by remember {
+                            derivedStateOf {
+                                when (tabTitles.getOrNull(pagerState.currentPage)) {
+                                    "SONGS" -> playerUiState.currentSongSortOption
+                                    "ALBUMS" -> playerUiState.currentAlbumSortOption
+                                    "ARTIST" -> playerUiState.currentArtistSortOption
+                                    "PLAYLISTS" -> playlistUiState.currentPlaylistSortOption
+                                    "LIKED" -> playerUiState.currentFavoriteSortOption
+                                    "FOLDERS" -> playerUiState.currentFolderSortOption
+                                    else -> SortOption.SongTitleAZ // Fallback
+                                }
+                            }
+                        }
+
+                        val onSortOptionChanged: (SortOption) -> Unit = remember(playerViewModel, playlistViewModel) {
                             { option ->
                                 when (tabTitles.getOrNull(pagerState.currentPage)) {
                                     "SONGS" -> playerViewModel.sortSongs(option)
@@ -408,6 +421,7 @@ fun LibraryScreen(
                                 }
                             }
                         }
+
                         LibraryActionRow(
                             modifier = Modifier.padding(
                                 top = 10.dp,

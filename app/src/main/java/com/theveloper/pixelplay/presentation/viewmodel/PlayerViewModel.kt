@@ -580,7 +580,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     // Helper function to convert SortOption name string to SortOption object
-    private fun getSortOptionFromString(optionName: String?): SortOption {
+    private fun getSortOptionFromString(optionName: String?, default: SortOption): SortOption {
         val allOptions = listOf(
             SortOption.SongTitleAZ, SortOption.SongTitleZA, SortOption.SongArtist, SortOption.SongAlbum,
             SortOption.SongDateAdded, SortOption.SongDuration,
@@ -591,7 +591,7 @@ class PlayerViewModel @Inject constructor(
             SortOption.PlaylistNameAZ, SortOption.PlaylistNameZA, SortOption.PlaylistDateCreated,
             SortOption.FolderNameAZ, SortOption.FolderNameZA
         )
-        return allOptions.find { it.displayName == optionName } ?: SortOption.SongTitleAZ // Default fallback
+        return allOptions.find { it.displayName == optionName } ?: default
     }
 
     init {
@@ -603,11 +603,11 @@ class PlayerViewModel @Inject constructor(
 
         // Load initial sort options ONCE at startup.
         viewModelScope.launch {
-            val initialSongSort = getSortOptionFromString(userPreferencesRepository.songsSortOptionFlow.first())
-            val initialAlbumSort = getSortOptionFromString(userPreferencesRepository.albumsSortOptionFlow.first())
-            val initialArtistSort = getSortOptionFromString(userPreferencesRepository.artistsSortOptionFlow.first())
-            val initialLikedSort = getSortOptionFromString(userPreferencesRepository.likedSongsSortOptionFlow.first())
-            val initialFolderSort = getSortOptionFromString(userPreferencesRepository.foldersSortOptionFlow.first())
+            val initialSongSort = getSortOptionFromString(userPreferencesRepository.songsSortOptionFlow.first(), SortOption.SongTitleAZ)
+            val initialAlbumSort = getSortOptionFromString(userPreferencesRepository.albumsSortOptionFlow.first(), SortOption.AlbumTitleAZ)
+            val initialArtistSort = getSortOptionFromString(userPreferencesRepository.artistsSortOptionFlow.first(), SortOption.ArtistNameAZ)
+            val initialLikedSort = getSortOptionFromString(userPreferencesRepository.likedSongsSortOptionFlow.first(), SortOption.LikedSongDateLiked)
+            val initialFolderSort = getSortOptionFromString(userPreferencesRepository.foldersSortOptionFlow.first(), SortOption.FolderNameAZ)
 
 
             _playerUiState.update {
